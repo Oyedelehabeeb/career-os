@@ -1173,6 +1173,256 @@ a {
   min-width: 130px;
   padding-inline: 18px;
 }
+.resume-privacy {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 24px;
+  padding: 15px 18px;
+  border: 1px solid #d8e5da;
+  border-radius: 9px;
+  background: #f4f9f3;
+}
+.resume-privacy > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  background: #e2efe3;
+  color: #367253;
+}
+.resume-privacy strong {
+  color: #2b4937;
+  font-size: 12px;
+}
+.resume-privacy p {
+  margin-top: 2px;
+  color: #7b8d81;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.resume-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 20px;
+  align-items: start;
+}
+.resume-library {
+  min-width: 0;
+  overflow: hidden;
+}
+.resume-library-heading {
+  align-items: center;
+}
+.resume-library-heading h2,
+.resume-upload h2 {
+  margin-top: 7px;
+  color: #263f31;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+.resume-archive-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #687a6f;
+  font-size: 10px;
+  font-weight: 650;
+}
+.resume-archive-toggle input {
+  accent-color: #27654d;
+}
+.resume-list {
+  border-top: 1px solid #e9eee8;
+}
+.resume-list li {
+  display: grid;
+  grid-template-columns: 43px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 15px;
+  padding: 17px 22px;
+  border-bottom: 1px solid #e9eee8;
+}
+.resume-list li:last-child {
+  border-bottom: 0;
+}
+.resume-list li.is-archived {
+  background: #fafaf8;
+  opacity: 0.72;
+}
+.resume-file-icon {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border-radius: 9px;
+  background: #eaf2e8;
+  color: #497b5b;
+}
+.resume-file-main {
+  min-width: 0;
+}
+.resume-file-main > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.resume-file-main strong {
+  overflow: hidden;
+  color: #294636;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.resume-file-main em {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #eeeae5;
+  color: #7d756d;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.resume-file-main p {
+  overflow: hidden;
+  margin-top: 3px;
+  color: #75867b;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.resume-file-main small {
+  display: block;
+  margin-top: 4px;
+  color: #9aa69e;
+  font-size: 9px;
+}
+.resume-file-main > span {
+  display: block;
+  margin-top: 7px;
+  color: #65786c;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.resume-actions {
+  display: flex;
+  gap: 4px;
+}
+.resume-actions button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 6px;
+  color: #61786b;
+}
+.resume-actions button:hover {
+  background: #edf3ec;
+  color: #286149;
+}
+.resume-actions button.is-danger:hover {
+  background: #f9ebe8;
+  color: #954b3f;
+}
+.resume-actions button:disabled {
+  opacity: 0.45;
+}
+.resume-empty {
+  display: grid;
+  min-height: 330px;
+  justify-items: center;
+  align-content: center;
+  padding: 40px;
+  color: #78907f;
+  text-align: center;
+}
+.resume-empty strong {
+  margin-top: 14px;
+  color: #344e3d;
+  font-size: 13px;
+}
+.resume-empty p {
+  max-width: 330px;
+  margin-top: 6px;
+  color: #8a988f;
+  font-size: 10px;
+  line-height: 1.65;
+}
+.resume-upload {
+  position: sticky;
+  top: 20px;
+  padding: 24px;
+}
+.resume-upload > p:not(.overview-eyebrow) {
+  margin-top: 7px;
+  color: #829087;
+  font-size: 10px;
+  line-height: 1.6;
+}
+.resume-upload form {
+  display: grid;
+  gap: 16px;
+  margin-top: 21px;
+}
+.resume-drop-field {
+  position: relative;
+}
+.resume-drop-field input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.resume-drop-field button {
+  display: grid;
+  width: 100%;
+  min-height: 128px;
+  justify-items: center;
+  align-content: center;
+  gap: 7px;
+  padding: 16px;
+  border: 1px dashed #b9ccbd;
+  border-radius: 8px;
+  background: #f8faf6;
+  color: #537661;
+  text-align: center;
+}
+.resume-drop-field button:hover {
+  border-color: #6f9c7f;
+  background: #f2f7ef;
+}
+.resume-drop-field strong {
+  max-width: 240px;
+  overflow: hidden;
+  color: #355b45;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.resume-drop-field small {
+  color: #91a097;
+  font-size: 9px;
+}
+.resume-upload-action {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 7px;
+  background: #1e5c49;
+  color: white;
+  font-size: 11px;
+  font-weight: 750;
+}
+.resume-upload-action:disabled {
+  opacity: 0.6;
+}
 .workspace-form-control {
   display: block;
   width: 100%;
@@ -1264,6 +1514,13 @@ a {
   }
   .profile-skill-panel {
     position: static;
+  }
+  .resume-layout {
+    grid-template-columns: 1fr;
+  }
+  .resume-upload {
+    position: static;
+    grid-row: 1;
   }
 }
 @media (max-width: 720px) {
@@ -1376,6 +1633,17 @@ a {
   }
   .profile-save-bar button {
     width: 100%;
+  }
+  .resume-list li {
+    grid-template-columns: 38px minmax(0, 1fr);
+    padding: 15px;
+  }
+  .resume-file-icon {
+    width: 38px;
+    height: 38px;
+  }
+  .resume-actions {
+    grid-column: 2;
   }
 }
 @media (max-width: 420px) {

@@ -267,7 +267,7 @@ export const getOpportunity = createServerFn({ method: 'GET' })
     const result = await supabase
       .from('opportunities')
       .select(
-        'id, company_id, title, location, work_mode, status, priority, saved_at, applied_at, source, source_url, job_description',
+        'id, company_id, resume_version_id, title, location, work_mode, status, priority, saved_at, applied_at, source, source_url, job_description',
       )
       .eq('id', data.opportunityId)
       .maybeSingle()
@@ -309,6 +309,7 @@ export const getOpportunity = createServerFn({ method: 'GET' })
       appliedAt: result.data.applied_at,
       sourceUrl: result.data.source_url,
       jobDescription: result.data.job_description,
+      resumeVersionId: result.data.resume_version_id,
       isSample: result.data.source === 'CareerOS sample',
       followUps: followUps.data
         .map((item) => ({

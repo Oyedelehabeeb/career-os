@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   BriefcaseBusiness,
+  FileText,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -15,6 +16,7 @@ import { createClient } from '../lib/supabase/client'
 const navigation = [
   { to: '/app', label: 'Overview', icon: LayoutDashboard },
   { to: '/opportunities', label: 'Opportunities', icon: BriefcaseBusiness },
+  { to: '/resumes', label: 'Resumes', icon: FileText },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ] as const
 

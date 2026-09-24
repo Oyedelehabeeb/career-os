@@ -18,6 +18,10 @@ import {
   getOpportunity,
   updateOpportunity,
 } from '../server/opportunities'
+import {
+  attachResumeToOpportunity,
+  listResumeVersions,
+} from '../server/resumes'
 import type { OpportunityStatus } from '../lib/opportunity'
 
 export const Route = createFileRoute('/opportunities_/$opportunityId')({
@@ -27,20 +31,26 @@ export const Route = createFileRoute('/opportunities_/$opportunityId')({
     if (!user) throw redirect({ to: '/login' })
     return { user }
   },
-  loader: ({ params }) =>
-    getOpportunity({ data: { opportunityId: params.opportunityId } }),
+  loader: async ({ params }) => {
+    const [opportunity, resumes] = await Promise.all([
+      getOpportunity({ data: { opportunityId: params.opportunityId } }),
+      listResumeVersions(),
+    ])
+    return { opportunity, resumes }
+  },
   component: OpportunityPage,
 })
 
 function OpportunityPage() {
   const { user } = Route.useRouteContext()
-  const opportunity = Route.useLoaderData()
+  const { opportunity, resumes } = Route.useLoaderData()
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [followUpBusy, setFollowUpBusy] = useState(false)
   const [completingId, setCompletingId] = useState<string | null>(null)
+  const [resumeBusy, setResumeBusy] = useState(false)
 
   if (!opportunity)
     return (
@@ -148,6 +158,28 @@ function OpportunityPage() {
       )
     } finally {
       setCompletingId(null)
+    }
+  }
+
+  async function attachResume(resumeVersionId: string) {
+    setResumeBusy(true)
+    setError(null)
+    try {
+      await attachResumeToOpportunity({
+        data: {
+          opportunityId: opportunity!.id,
+          resumeVersionId: resumeVersionId || null,
+        },
+      })
+      await router.invalidate()
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Unable to attach this resume.',
+      )
+    } finally {
+      setResumeBusy(false)
     }
   }
 
@@ -354,6 +386,49 @@ function OpportunityPage() {
               )}
           </section>
           <div className="space-y-6 self-start">
+            <section
+              aria-labelledby="resume-heading"
+              className="border border-[#dbe3dd] bg-white p-6"
+            >
+              <h2 id="resume-heading" className="text-lg font-semibold">
+                Resume used
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-[#74847a]">
+                Preserve the exact version sent with this application.
+              </p>
+              <label htmlFor="opportunity-resume" className="sr-only">
+                Resume used for this opportunity
+              </label>
+              <select
+                id="opportunity-resume"
+                value={opportunity.resumeVersionId ?? ''}
+                disabled={resumeBusy}
+                onChange={(event) => void attachResume(event.target.value)}
+                className="workspace-form-control mt-4"
+              >
+                <option value="">No resume attached</option>
+                {resumes
+                  .filter(
+                    (resume) =>
+                      !resume.isArchived ||
+                      resume.id === opportunity.resumeVersionId,
+                  )
+                  .map((resume) => (
+                    <option key={resume.id} value={resume.id}>
+                      {resume.name}
+                      {resume.isArchived ? ' (archived)' : ''}
+                    </option>
+                  ))}
+              </select>
+              {!resumes.length && (
+                <Link
+                  to="/resumes"
+                  className="mt-3 inline-block text-xs font-semibold text-[#2b7052]"
+                >
+                  Add your first resume →
+                </Link>
+              )}
+            </section>
             <section
               aria-labelledby="followups-heading"
               className="border border-[#dbe3dd] bg-white p-6"

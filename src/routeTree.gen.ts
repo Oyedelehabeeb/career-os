@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ResumesRouteImport } from './routes/resumes'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
 import { Route as OpportunitiesOpportunityIdRouteImport } from './routes/opportunities_.$opportunityId'
@@ -43,6 +44,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResumesRoute = ResumesRouteImport.update({
+  id: '/resumes',
+  path: '/resumes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/opportunities': typeof OpportunitiesRoute
   '/profile': typeof ProfileRoute
+  '/resumes': typeof ResumesRoute
   '/sign-up': typeof SignUpRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/opportunities/$opportunityId': typeof OpportunitiesOpportunityIdRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/opportunities': typeof OpportunitiesRoute
   '/profile': typeof ProfileRoute
+  '/resumes': typeof ResumesRoute
   '/sign-up': typeof SignUpRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/opportunities/$opportunityId': typeof OpportunitiesOpportunityIdRoute
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/opportunities': typeof OpportunitiesRoute
   '/profile': typeof ProfileRoute
+  '/resumes': typeof ResumesRoute
   '/sign-up': typeof SignUpRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/opportunities_/$opportunityId': typeof OpportunitiesOpportunityIdRoute
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/opportunities'
     | '/profile'
+    | '/resumes'
     | '/sign-up'
     | '/auth/confirm'
     | '/opportunities/$opportunityId'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/opportunities'
     | '/profile'
+    | '/resumes'
     | '/sign-up'
     | '/auth/confirm'
     | '/opportunities/$opportunityId'
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/opportunities'
     | '/profile'
+    | '/resumes'
     | '/sign-up'
     | '/auth/confirm'
     | '/opportunities_/$opportunityId'
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OpportunitiesRoute: typeof OpportunitiesRoute
   ProfileRoute: typeof ProfileRoute
+  ResumesRoute: typeof ResumesRoute
   SignUpRoute: typeof SignUpRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
   OpportunitiesOpportunityIdRoute: typeof OpportunitiesOpportunityIdRoute
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resumes': {
+      id: '/resumes'
+      path: '/resumes'
+      fullPath: '/resumes'
+      preLoaderRoute: typeof ResumesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-up': {
       id: '/sign-up'
       path: '/sign-up'
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OpportunitiesRoute: OpportunitiesRoute,
   ProfileRoute: ProfileRoute,
+  ResumesRoute: ResumesRoute,
   SignUpRoute: SignUpRoute,
   AuthConfirmRoute: AuthConfirmRoute,
   OpportunitiesOpportunityIdRoute: OpportunitiesOpportunityIdRoute,

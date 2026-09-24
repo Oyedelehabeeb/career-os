@@ -10,8 +10,10 @@ import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 
 import { AppShell } from '../components/app-shell'
 import { statusLabels } from '../lib/opportunity'
+import { profileCompletion } from '../lib/profile'
 import { getCurrentUser } from '../server/auth'
 import { listDueFollowUps, listOpportunities } from '../server/opportunities'
+import { getCareerProfile } from '../server/profile'
 import type { OpportunitySummary } from '../lib/opportunity'
 
 const activeStatuses = new Set([
@@ -37,11 +39,12 @@ export const Route = createFileRoute('/app')({
     return { user }
   },
   loader: async () => {
-    const [opportunities, followUps] = await Promise.all([
+    const [opportunities, followUps, careerProfile] = await Promise.all([
       listOpportunities(),
       listDueFollowUps(),
+      getCareerProfile(),
     ])
-    return { opportunities, followUps }
+    return { opportunities, followUps, careerProfile }
   },
   component: AppHome,
   errorComponent: ({ error }) => (
@@ -104,7 +107,11 @@ function OpportunityRow({ opportunity }: { opportunity: OpportunitySummary }) {
 
 function AppHome() {
   const { user } = Route.useRouteContext()
-  const { opportunities, followUps } = Route.useLoaderData()
+  const { opportunities, followUps, careerProfile } = Route.useLoaderData()
+  const completion = profileCompletion(
+    careerProfile.profile,
+    careerProfile.skills.length,
+  )
   const realOpportunities = opportunities.filter((item) => !item.isSample)
   const active = realOpportunities.filter((item) =>
     activeStatuses.has(item.status),
@@ -291,24 +298,27 @@ function AppHome() {
             className="workspace-panel overview-guide"
             aria-labelledby="guide-heading"
           >
-            <p className="overview-eyebrow">A GOOD PLACE TO START</p>
-            <h2 id="guide-heading">Build a search you can learn from.</h2>
+            <p className="overview-eyebrow">CAREER FOUNDATION</p>
+            <h2 id="guide-heading">
+              {completion === 100
+                ? 'Your profile is ready for intelligence.'
+                : 'Give every role better context.'}
+            </h2>
             <p>
-              Keep each role in one place, record status changes as they happen,
-              and let your history reveal patterns over time.
+              CareerOS uses your private profile and skills to explain where a
+              role aligns—and where it may stretch you.
             </p>
-            <div className="overview-guide-line">
-              <span>01</span>
-              <span>Save roles as you discover them</span>
+            <div className="overview-profile-meter">
+              <span style={{ width: `${completion}%` }} />
             </div>
             <div className="overview-guide-line">
-              <span>02</span>
-              <span>Keep the application stage current</span>
+              <span>{completion}%</span>
+              <span>Profile foundation complete</span>
             </div>
-            <div className="overview-guide-line">
-              <span>03</span>
-              <span>Review the story of each opportunity</span>
-            </div>
+            <Link to="/profile" className="overview-profile-link">
+              {completion ? 'Continue profile' : 'Start career profile'}{' '}
+              <ArrowRight size={15} aria-hidden="true" />
+            </Link>
           </section>
         </div>
       </main>

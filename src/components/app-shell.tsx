@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  UserRound,
   X,
 } from 'lucide-react'
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
@@ -14,6 +15,7 @@ import { createClient } from '../lib/supabase/client'
 const navigation = [
   { to: '/app', label: 'Overview', icon: LayoutDashboard },
   { to: '/opportunities', label: 'Opportunities', icon: BriefcaseBusiness },
+  { to: '/profile', label: 'Profile', icon: UserRound },
 ] as const
 
 export function AppShell({

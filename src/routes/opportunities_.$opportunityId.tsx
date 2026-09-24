@@ -9,8 +9,10 @@ import {
 } from '@tanstack/react-router'
 
 import { AppShell } from '../components/app-shell'
+import { JobIntelligencePanel } from '../components/job-intelligence-panel'
 import { opportunityStatuses, statusLabels } from '../lib/opportunity'
 import { getCurrentUser } from '../server/auth'
+import { getJobAnalysis } from '../server/job-intelligence'
 import {
   changeOpportunityStatus,
   completeFollowUp,
@@ -32,18 +34,19 @@ export const Route = createFileRoute('/opportunities_/$opportunityId')({
     return { user }
   },
   loader: async ({ params }) => {
-    const [opportunity, resumes] = await Promise.all([
+    const [opportunity, resumes, analysis] = await Promise.all([
       getOpportunity({ data: { opportunityId: params.opportunityId } }),
       listResumeVersions(),
+      getJobAnalysis({ data: { opportunityId: params.opportunityId } }),
     ])
-    return { opportunity, resumes }
+    return { opportunity, resumes, analysis }
   },
   component: OpportunityPage,
 })
 
 function OpportunityPage() {
   const { user } = Route.useRouteContext()
-  const { opportunity, resumes } = Route.useLoaderData()
+  const { opportunity, resumes, analysis } = Route.useLoaderData()
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
@@ -356,35 +359,42 @@ function OpportunityPage() {
           </form>
         )}
         <div className="grid gap-6 py-8 lg:grid-cols-[minmax(0,1fr)_330px]">
-          <section
-            aria-labelledby="description-heading"
-            className="min-w-0 border border-[#dbe3dd] bg-white p-6"
-          >
-            <h2 id="description-heading" className="text-lg font-semibold">
-              Job description
-            </h2>
-            {opportunity.jobDescription ? (
-              <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[#394f48]">
-                {opportunity.jobDescription}
-              </p>
-            ) : (
-              <p className="mt-4 text-sm text-[#52645f]">
-                No description added yet. Use Edit details to add the role's
-                requirements.
-              </p>
-            )}
-            {opportunity.sourceUrl &&
-              /^https?:\/\//i.test(opportunity.sourceUrl) && (
-                <a
-                  href={opportunity.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-block break-all text-sm"
-                >
-                  Open original posting ↗
-                </a>
+          <div className="min-w-0 space-y-6">
+            <section
+              aria-labelledby="description-heading"
+              className="border border-[#dbe3dd] bg-white p-6"
+            >
+              <h2 id="description-heading" className="text-lg font-semibold">
+                Job description
+              </h2>
+              {opportunity.jobDescription ? (
+                <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[#394f48]">
+                  {opportunity.jobDescription}
+                </p>
+              ) : (
+                <p className="mt-4 text-sm text-[#52645f]">
+                  No description added yet. Use Edit details to add the role's
+                  requirements.
+                </p>
               )}
-          </section>
+              {opportunity.sourceUrl &&
+                /^https?:\/\//i.test(opportunity.sourceUrl) && (
+                  <a
+                    href={opportunity.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 inline-block break-all text-sm"
+                  >
+                    Open original posting ↗
+                  </a>
+                )}
+            </section>
+            <JobIntelligencePanel
+              opportunityId={opportunity.id}
+              hasDescription={Boolean(opportunity.jobDescription?.trim())}
+              analysis={analysis}
+            />
+          </div>
           <div className="space-y-6 self-start">
             <section
               aria-labelledby="resume-heading"

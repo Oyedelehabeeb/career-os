@@ -1,6 +1,6 @@
 # CareerOS
 
-CareerOS is a private job-search intelligence workspace. The current foundation includes email/password authentication, an action-led overview, opportunity tracking, career profiles and skills, and private resume-version management. Users can upload PDF or DOCX resumes, archive or securely download them, and associate the exact version used with an opportunity. Full analytics and AI intelligence are not implemented yet.
+CareerOS is a private job-search intelligence workspace. The current foundation includes email/password authentication, an action-led overview, opportunity tracking, career profiles and skills, private resume-version management, and provider-neutral job-description intelligence. Users can extract an editable role brief locally without sending job descriptions to a third-party AI service. Full candidate-role matching and analytics are not implemented yet.
 
 ## Local setup
 
@@ -17,6 +17,8 @@ The follow-up schema in `supabase/migrations/20260919170000_follow_ups.sql` was 
 The career-profile schema in `supabase/migrations/20260924100000_career_profile.sql` was applied through the dashboard SQL Editor on 2026-09-24. The `profiles`, `skills`, and `profile_skills` tables have RLS enabled with 12 owner-only policies.
 
 The resume schema in `supabase/migrations/20260924140000_resume_versions.sql` was applied through the dashboard SQL Editor on 2026-09-24. It adds the private `resume_versions` table, an owner-safe opportunity association, and a non-public `resumes` Storage bucket limited to PDF/DOCX files of at most 10 MB. Four table policies and three storage-object policies isolate every record and file to its owner.
+
+The job-intelligence schema in `supabase/migrations/20260924180000_job_intelligence.sql` was applied through the dashboard SQL Editor on 2026-09-24. The private `job_analyses` table stores source hashes, parser provenance, review state, and structured requirements behind four owner-only RLS policies. Analysis is currently performed with deterministic local rules and must be reviewed by the user; no job-description content is sent to an external AI provider.
 
 Dashboard execution does not register these files in Supabase CLI migration history. Before adopting `supabase db push` for this project, reconcile the remote migration history with these already-applied migrations; do not blindly push the same CREATE statements again.
 

@@ -9,10 +9,12 @@ import {
 } from '@tanstack/react-router'
 
 import { AppShell } from '../components/app-shell'
+import { CandidateFitPanel } from '../components/candidate-fit-panel'
 import { JobIntelligencePanel } from '../components/job-intelligence-panel'
 import { opportunityStatuses, statusLabels } from '../lib/opportunity'
 import { getCurrentUser } from '../server/auth'
 import { getJobAnalysis } from '../server/job-intelligence'
+import { getOpportunityFit } from '../server/opportunity-fit'
 import {
   changeOpportunityStatus,
   completeFollowUp,
@@ -34,19 +36,20 @@ export const Route = createFileRoute('/opportunities_/$opportunityId')({
     return { user }
   },
   loader: async ({ params }) => {
-    const [opportunity, resumes, analysis] = await Promise.all([
+    const [opportunity, resumes, analysis, fit] = await Promise.all([
       getOpportunity({ data: { opportunityId: params.opportunityId } }),
       listResumeVersions(),
       getJobAnalysis({ data: { opportunityId: params.opportunityId } }),
+      getOpportunityFit({ data: { opportunityId: params.opportunityId } }),
     ])
-    return { opportunity, resumes, analysis }
+    return { opportunity, resumes, analysis, fit }
   },
   component: OpportunityPage,
 })
 
 function OpportunityPage() {
   const { user } = Route.useRouteContext()
-  const { opportunity, resumes, analysis } = Route.useLoaderData()
+  const { opportunity, resumes, analysis, fit } = Route.useLoaderData()
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
@@ -211,7 +214,7 @@ function OpportunityPage() {
             </h1>
             <p className="mt-3 text-sm text-[#52645f]">
               {opportunity.location || 'Location not set'} · Saved{' '}
-              {new Intl.DateTimeFormat(undefined, {
+              {new Intl.DateTimeFormat('en-GB', {
                 dateStyle: 'medium',
               }).format(new Date(opportunity.savedAt))}
             </p>
@@ -394,6 +397,11 @@ function OpportunityPage() {
               hasDescription={Boolean(opportunity.jobDescription?.trim())}
               analysis={analysis}
             />
+            <CandidateFitPanel
+              opportunityId={opportunity.id}
+              jobAnalysis={analysis}
+              fit={fit}
+            />
           </div>
           <div className="space-y-6 self-start">
             <section
@@ -523,7 +531,7 @@ function OpportunityPage() {
                           dateTime={followUp.dueAt}
                           className="mt-1 block text-[11px] text-[#84948a]"
                         >
-                          {new Intl.DateTimeFormat(undefined, {
+                          {new Intl.DateTimeFormat('en-GB', {
                             dateStyle: 'medium',
                             timeStyle: 'short',
                           }).format(new Date(followUp.dueAt))}
@@ -565,7 +573,7 @@ function OpportunityPage() {
                       dateTime={event.occurredAt}
                       className="mt-1 block text-xs text-[#687a73]"
                     >
-                      {new Intl.DateTimeFormat(undefined, {
+                      {new Intl.DateTimeFormat('en-GB', {
                         dateStyle: 'medium',
                         timeStyle: 'short',
                       }).format(new Date(event.occurredAt))}

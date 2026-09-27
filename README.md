@@ -1,6 +1,6 @@
 # CareerOS
 
-CareerOS is a private job-search intelligence workspace. The current foundation includes email/password authentication, an action-led overview, opportunity tracking, career profiles and skills, private resume-version management, and provider-neutral job-description intelligence. Users can extract an editable role brief locally without sending job descriptions to a third-party AI service. Full candidate-role matching and analytics are not implemented yet.
+CareerOS is a private job-search intelligence workspace. The current foundation includes email/password authentication, an action-led overview, opportunity tracking, career profiles and skills, private resume-version management, provider-neutral job-description intelligence, and explainable candidate-role fit analysis. Users can extract an editable role brief and compare it with profile and selected-resume evidence locally without sending private career data to a third-party AI service. Analytics are not implemented yet.
 
 ## Local setup
 
@@ -19,6 +19,8 @@ The career-profile schema in `supabase/migrations/20260924100000_career_profile.
 The resume schema in `supabase/migrations/20260924140000_resume_versions.sql` was applied through the dashboard SQL Editor on 2026-09-24. It adds the private `resume_versions` table, an owner-safe opportunity association, and a non-public `resumes` Storage bucket limited to PDF/DOCX files of at most 10 MB. Four table policies and three storage-object policies isolate every record and file to its owner.
 
 The job-intelligence schema in `supabase/migrations/20260924180000_job_intelligence.sql` was applied through the dashboard SQL Editor on 2026-09-24. The private `job_analyses` table stores source hashes, parser provenance, review state, and structured requirements behind four owner-only RLS policies. Analysis is currently performed with deterministic local rules and must be reviewed by the user; no job-description content is sent to an external AI provider.
+
+The candidate-role fit schema in `supabase/migrations/20260924220000_opportunity_fit.sql` was applied through the dashboard SQL Editor on 2026-09-24. The private `opportunity_fit_analyses` table stores input hashes, evaluator provenance, and validated explainable results behind four owner-only RLS policies. Comparisons identify evidence, gaps, alignment, and preparation topics without manufacturing a percentage score. Searchable resume text is optional, private, and user-supplied; when it is absent, the product explicitly limits the comparison to profile evidence.
 
 Dashboard execution does not register these files in Supabase CLI migration history. Before adopting `supabase db push` for this project, reconcile the remote migration history with these already-applied migrations; do not blindly push the same CREATE statements again.
 

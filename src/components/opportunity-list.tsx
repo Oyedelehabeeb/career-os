@@ -11,7 +11,7 @@ import { opportunityStatuses, statusLabels } from '../lib/opportunity'
 import type { OpportunitySummary, OpportunityStatus } from '../lib/opportunity'
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('en-GB', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

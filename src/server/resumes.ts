@@ -5,6 +5,7 @@ import {
   createResumeVersionSchema,
   resumeIdSchema,
   setResumeArchivedSchema,
+  updateResumeTextSchema,
 } from '../lib/resume'
 import { createClient } from '../lib/supabase/server'
 import type { ResumeVersion } from '../lib/resume'
@@ -22,7 +23,7 @@ export const listResumeVersions = createServerFn({ method: 'GET' }).handler(
     const result = await supabase
       .from('resume_versions')
       .select(
-        'id, name, original_file_name, storage_path, mime_type, file_size, notes, is_archived, created_at',
+        'id, name, original_file_name, storage_path, mime_type, file_size, extracted_text, notes, is_archived, created_at',
       )
       .order('is_archived', { ascending: true })
       .order('created_at', { ascending: false })
@@ -37,6 +38,7 @@ export const listResumeVersions = createServerFn({ method: 'GET' }).handler(
       storagePath: row.storage_path,
       mimeType: row.mime_type as ResumeVersion['mimeType'],
       fileSize: Number(row.file_size),
+      extractedText: row.extracted_text ?? '',
       notes: row.notes,
       isArchived: row.is_archived,
       createdAt: row.created_at,
@@ -98,6 +100,21 @@ export const setResumeArchived = createServerFn({ method: 'POST' })
       .select('id')
       .maybeSingle()
     if (result.error) throw new Error('Unable to update this resume.')
+    if (!result.data) throw new Error('Resume not found.')
+    return { id: result.data.id }
+  })
+
+export const updateResumeText = createServerFn({ method: 'POST' })
+  .validator((input: unknown) => updateResumeTextSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { supabase } = await requireUser()
+    const result = await supabase
+      .from('resume_versions')
+      .update({ extracted_text: data.extractedText || null })
+      .eq('id', data.resumeId)
+      .select('id')
+      .maybeSingle()
+    if (result.error) throw new Error('Unable to save searchable resume text.')
     if (!result.data) throw new Error('Resume not found.')
     return { id: result.data.id }
   })

@@ -5,6 +5,7 @@ import {
   ArchiveRestore,
   Download,
   FileText,
+  FileSearch,
   Plus,
   ShieldCheck,
   Trash2,
@@ -14,8 +15,9 @@ import { useRouter } from '@tanstack/react-router'
 
 import {
   formatFileSize,
-  resumeMimeTypes,
   safeStorageFileName,
+  type ResumeVersion,
+  type resumeMimeTypes,
 } from '../lib/resume'
 import { createClient } from '../lib/supabase/client'
 import {
@@ -23,8 +25,8 @@ import {
   createResumeVersion,
   deleteResumeVersion,
   setResumeArchived,
+  updateResumeText,
 } from '../server/resumes'
-import type { ResumeVersion } from '../lib/resume'
 
 const maxFileSize = 10 * 1024 * 1024
 
@@ -51,6 +53,8 @@ export function ResumeManager({
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [busy, setBusy] = useState(false)
   const [actionId, setActionId] = useState<string | null>(null)
+  const [editingTextId, setEditingTextId] = useState<string | null>(null)
+  const [resumeText, setResumeText] = useState('')
   const [showArchived, setShowArchived] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -179,6 +183,34 @@ export function ResumeManager({
     }
   }
 
+  function editResumeText(resume: ResumeVersion) {
+    setEditingTextId(resume.id)
+    setResumeText(resume.extractedText)
+    setError(null)
+    setMessage(null)
+  }
+
+  async function saveResumeText(resume: ResumeVersion) {
+    setActionId(resume.id)
+    setError(null)
+    try {
+      await updateResumeText({
+        data: { resumeId: resume.id, extractedText: resumeText },
+      })
+      setEditingTextId(null)
+      setMessage('Searchable resume text saved privately.')
+      await router.invalidate()
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Unable to save searchable resume text.',
+      )
+    } finally {
+      setActionId(null)
+    }
+  }
+
   return (
     <main className="workspace-page">
       <div className="workspace-page-topline">
@@ -258,13 +290,31 @@ export function ResumeManager({
                     <p>{resume.originalFileName}</p>
                     <small>
                       {formatFileSize(resume.fileSize)} · Added{' '}
-                      {new Intl.DateTimeFormat(undefined, {
+                      {new Intl.DateTimeFormat('en-GB', {
                         dateStyle: 'medium',
                       }).format(new Date(resume.createdAt))}
                     </small>
                     {resume.notes && <span>{resume.notes}</span>}
+                    <small className="resume-text-state">
+                      {resume.extractedText
+                        ? 'Searchable text ready for fit analysis'
+                        : 'Resume text not added'}
+                    </small>
                   </div>
                   <div className="resume-actions">
+                    <button
+                      type="button"
+                      onClick={() => editResumeText(resume)}
+                      disabled={actionId === resume.id}
+                      aria-label={`${resume.extractedText ? 'Edit' : 'Add'} searchable text for ${resume.name}`}
+                      title={
+                        resume.extractedText
+                          ? 'Edit resume text'
+                          : 'Add resume text'
+                      }
+                    >
+                      <FileSearch size={16} aria-hidden="true" />
+                    </button>
                     <button
                       type="button"
                       onClick={() => void downloadResume(resume.id)}
@@ -298,6 +348,40 @@ export function ResumeManager({
                       <Trash2 size={16} aria-hidden="true" />
                     </button>
                   </div>
+                  {editingTextId === resume.id && (
+                    <div className="resume-text-editor">
+                      <label htmlFor={`resume-text-${resume.id}`}>
+                        Searchable resume text
+                      </label>
+                      <p>
+                        Paste the text from this exact version. It stays private
+                        and is used to explain role fit.
+                      </p>
+                      <textarea
+                        id={`resume-text-${resume.id}`}
+                        value={resumeText}
+                        maxLength={100000}
+                        rows={10}
+                        onChange={(event) => setResumeText(event.target.value)}
+                      />
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setEditingTextId(null)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className="is-primary"
+                          disabled={actionId === resume.id}
+                          onClick={() => void saveResumeText(resume)}
+                        >
+                          {actionId === resume.id ? 'Saving…' : 'Save text'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

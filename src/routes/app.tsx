@@ -130,7 +130,7 @@ function AppHome() {
         <div className="workspace-page-topline">
           <span>WORKSPACE OVERVIEW</span>
           <span>
-            {new Intl.DateTimeFormat(undefined, { dateStyle: 'full' }).format(
+            {new Intl.DateTimeFormat('en-GB', { dateStyle: 'full' }).format(
               new Date(),
             )}
           </span>
@@ -241,7 +241,7 @@ function AppHome() {
                     >
                       {overdue
                         ? 'Overdue'
-                        : new Intl.DateTimeFormat(undefined, {
+                        : new Intl.DateTimeFormat('en-GB', {
                             month: 'short',
                             day: 'numeric',
                           }).format(new Date(followUp.dueAt))}

@@ -29,6 +29,10 @@ export const attachResumeSchema = z.object({
   resumeVersionId: z.union([z.uuid(), z.null()]),
 })
 
+export const updateResumeTextSchema = resumeIdSchema.extend({
+  extractedText: z.string().trim().max(100_000),
+})
+
 export type ResumeVersion = {
   id: string
   name: string
@@ -36,6 +40,7 @@ export type ResumeVersion = {
   storagePath: string
   mimeType: (typeof resumeMimeTypes)[number]
   fileSize: number
+  extractedText: string
   notes: string | null
   isArchived: boolean
   createdAt: string

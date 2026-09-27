@@ -6,6 +6,7 @@ import {
   createResumeVersionSchema,
   formatFileSize,
   safeStorageFileName,
+  updateResumeTextSchema,
 } from '../src/lib/resume.ts'
 
 const resume = {
@@ -56,6 +57,24 @@ test('opportunity resume association supports attach and detach', () => {
     attachResumeSchema.safeParse({ opportunityId, resumeVersionId: null })
       .success,
     true,
+  )
+})
+
+test('searchable resume text is bounded and tied to a private resume id', () => {
+  const resumeId = '389dd3c9-876a-419e-992a-b3f6f98c63e8'
+  assert.equal(
+    updateResumeTextSchema.safeParse({
+      resumeId,
+      extractedText: 'Built accessible React products.',
+    }).success,
+    true,
+  )
+  assert.equal(
+    updateResumeTextSchema.safeParse({
+      resumeId,
+      extractedText: 'x'.repeat(100_001),
+    }).success,
+    false,
   )
 })
 

@@ -68,6 +68,7 @@ export function OpportunityList({
           companyName: String(form.get('companyName') ?? ''),
           title: String(form.get('title') ?? ''),
           location: String(form.get('location') ?? ''),
+          source: String(form.get('source') ?? ''),
           sourceUrl: String(form.get('sourceUrl') ?? ''),
           jobDescription: String(form.get('jobDescription') ?? ''),
           priority: String(form.get('priority') ?? 'medium') as
@@ -417,6 +418,11 @@ export function OpportunityList({
               label="Location"
               name="location"
               placeholder="City or remote"
+            />
+            <Field
+              label="Source"
+              name="source"
+              placeholder="e.g. Referral or LinkedIn"
             />
             <Field
               label="Job URL"

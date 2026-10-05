@@ -102,6 +102,7 @@ function OpportunityPage() {
           location: String(form.get('location') ?? ''),
           workMode: String(form.get('workMode') ?? 'unspecified') as
             'remote' | 'hybrid' | 'on_site' | 'unspecified',
+          source: String(form.get('source') ?? ''),
           sourceUrl: String(form.get('sourceUrl') ?? ''),
           jobDescription: String(form.get('jobDescription') ?? ''),
           priority: String(form.get('priority') ?? 'medium') as
@@ -332,6 +333,11 @@ function OpportunityPage() {
                   <option value="high">High</option>
                 </select>
               </div>
+              <EditField
+                label="Source"
+                name="source"
+                defaultValue={opportunity.source ?? ''}
+              />
               <EditField
                 label="Job URL"
                 name="sourceUrl"

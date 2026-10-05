@@ -3252,6 +3252,348 @@ a {
     display: none;
   }
 }
+
+/* Analytics */
+.analytics-page {
+  padding-bottom: 5rem;
+}
+
+.analytics-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid #dce7de;
+  background: #f7faf5;
+  padding: 0.9rem 1rem;
+  color: #54675d;
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.analytics-note svg {
+  flex: none;
+  color: #3d765e;
+}
+
+.analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.analytics-kpi {
+  min-width: 0;
+  border: 1px solid #dfe7df;
+  background: white;
+  padding: 1.2rem;
+}
+
+.analytics-kpi > span {
+  display: block;
+  min-height: 2.2rem;
+  color: #66786d;
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.analytics-kpi strong {
+  display: block;
+  margin-top: 0.55rem;
+  color: #173e32;
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+}
+
+.analytics-kpi small {
+  display: block;
+  margin-top: 0.35rem;
+  color: #8a988f;
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.analytics-primary-grid,
+.analytics-secondary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.analytics-secondary-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.analytics-panel {
+  min-width: 0;
+  border: 1px solid #dfe7df;
+  background: white;
+  padding: 1.4rem;
+}
+
+.analytics-wide {
+  margin-bottom: 1.25rem;
+}
+
+.analytics-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+}
+
+.analytics-panel-heading h2 {
+  margin-top: 0.35rem;
+  color: #1b382f;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.analytics-panel-heading > svg {
+  flex: none;
+  color: #60806f;
+}
+
+.analytics-funnel,
+.analytics-stage-times,
+.analytics-skills {
+  display: grid;
+  gap: 1rem;
+}
+
+.analytics-funnel-row,
+.analytics-stage-time,
+.analytics-skill {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.75fr) minmax(130px, 1.5fr) minmax(
+      95px,
+      0.7fr
+    );
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.analytics-funnel-row > div,
+.analytics-stage-time > div,
+.analytics-skill > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #40564c;
+  font-size: 0.75rem;
+}
+
+.analytics-funnel-row > div strong,
+.analytics-stage-time > div strong,
+.analytics-skill > div strong {
+  color: #173e32;
+  font-size: 0.78rem;
+}
+
+.analytics-track {
+  display: block;
+  height: 0.48rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #edf1eb;
+}
+
+.analytics-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #39745c;
+}
+
+.analytics-funnel-row small,
+.analytics-stage-time small,
+.analytics-skill small {
+  color: #87958c;
+  font-size: 0.66rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.analytics-stage-time,
+.analytics-skill {
+  grid-template-columns: minmax(125px, 1fr) minmax(100px, 1.15fr) minmax(
+      62px,
+      0.45fr
+    );
+}
+
+.analytics-definition {
+  margin-top: 1.35rem;
+  border-top: 1px solid #e8eee8;
+  padding-top: 0.9rem;
+  color: #849188;
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.analytics-empty {
+  display: flex;
+  min-height: 9rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 1px dashed #d9e4da;
+  background: #fbfcfa;
+  padding: 1.5rem;
+  color: #8a988f;
+  text-align: center;
+}
+
+.analytics-empty p {
+  max-width: 25rem;
+  font-size: 0.74rem;
+  line-height: 1.65;
+}
+
+.analytics-table-wrap {
+  overflow-x: auto;
+}
+
+.analytics-table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.analytics-table th,
+.analytics-table td {
+  border-bottom: 1px solid #e8eee8;
+  padding: 0.85rem 0.75rem;
+  color: #53675d;
+  font-size: 0.74rem;
+}
+
+.analytics-table thead th {
+  background: #f8faf7;
+  color: #839087;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.analytics-table tbody th,
+.analytics-table td strong {
+  color: #203f34;
+  font-weight: 650;
+}
+
+.analytics-table tbody tr:last-child th,
+.analytics-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.analytics-compact-list {
+  display: grid;
+}
+
+.analytics-compact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #e8eee8;
+  padding: 0.9rem 0;
+}
+
+.analytics-compact-row:first-child {
+  padding-top: 0;
+}
+
+.analytics-compact-row:last-child {
+  border-bottom: 0;
+}
+
+.analytics-compact-row > div {
+  min-width: 0;
+}
+
+.analytics-compact-row strong,
+.analytics-compact-row small {
+  display: block;
+}
+
+.analytics-compact-row strong {
+  overflow: hidden;
+  color: #234236;
+  font-size: 0.78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analytics-compact-row small {
+  margin-top: 0.25rem;
+  color: #89968e;
+  font-size: 0.66rem;
+  line-height: 1.45;
+}
+
+.analytics-compact-row > span {
+  flex: none;
+  color: #1b5c46;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.analytics-compact-row > span small {
+  margin-top: 0.1rem;
+  font-weight: 500;
+}
+
+@media (max-width: 1000px) {
+  .analytics-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analytics-primary-grid,
+  .analytics-secondary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 620px) {
+  .analytics-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .analytics-kpi > span {
+    min-height: 0;
+  }
+
+  .analytics-funnel-row,
+  .analytics-stage-time,
+  .analytics-skill {
+    grid-template-columns: minmax(0, 1fr) 72px;
+    gap: 0.45rem 0.75rem;
+  }
+
+  .analytics-funnel-row > div,
+  .analytics-stage-time > div,
+  .analytics-skill > div {
+    grid-column: 1 / -1;
+  }
+
+  .analytics-funnel-row small,
+  .analytics-stage-time small,
+  .analytics-skill small {
+    text-align: right;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .workspace-shell *,
   .workspace-shell *::before,

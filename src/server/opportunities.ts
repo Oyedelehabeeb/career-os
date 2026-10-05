@@ -109,6 +109,7 @@ export const createOpportunity = createServerFn({ method: 'POST' })
         company_id: companyId,
         title: data.title || null,
         location: data.location || null,
+        source: data.source || null,
         source_url: data.sourceUrl || null,
         job_description: data.jobDescription || null,
         priority: data.priority,
@@ -124,9 +125,22 @@ export const changeOpportunityStatus = createServerFn({ method: 'POST' })
   .validator((input: unknown) => changeStatusSchema.parse(input))
   .handler(async ({ data }) => {
     const { supabase } = await requireUser()
+    const current = await supabase
+      .from('opportunities')
+      .select('applied_at')
+      .eq('id', data.opportunityId)
+      .maybeSingle()
+    if (current.error) throw new Error('Unable to update the status.')
+    if (!current.data) throw new Error('Opportunity not found.')
     const result = await supabase
       .from('opportunities')
-      .update({ status: data.status })
+      .update({
+        status: data.status,
+        applied_at:
+          data.status === 'applied' && !current.data.applied_at
+            ? new Date().toISOString()
+            : current.data.applied_at,
+      })
       .eq('id', data.opportunityId)
       .select('id')
       .maybeSingle()
@@ -175,6 +189,7 @@ export const updateOpportunity = createServerFn({ method: 'POST' })
         title: data.title || null,
         location: data.location || null,
         work_mode: data.workMode === 'unspecified' ? null : data.workMode,
+        source: data.source || null,
         source_url: data.sourceUrl || null,
         job_description: data.jobDescription || null,
         priority: data.priority,
@@ -308,6 +323,7 @@ export const getOpportunity = createServerFn({ method: 'GET' })
       priority: result.data.priority as OpportunitySummary['priority'],
       savedAt: result.data.saved_at,
       appliedAt: result.data.applied_at,
+      source: result.data.source,
       sourceUrl: result.data.source_url,
       jobDescription: result.data.job_description,
       resumeVersionId: result.data.resume_version_id,

@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { ArrowUpRight, BriefcaseBusiness, Plus, Search } from 'lucide-react'
+import {
+  ArrowUpRight,
+  BriefcaseBusiness,
+  Columns3,
+  List,
+  Plus,
+  Search,
+} from 'lucide-react'
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
 
 import {
@@ -8,6 +15,7 @@ import {
   changeOpportunityStatus,
 } from '../server/opportunities'
 import { opportunityStatuses, statusLabels } from '../lib/opportunity'
+import { OpportunityPipeline } from './opportunity-pipeline'
 import type { OpportunitySummary, OpportunityStatus } from '../lib/opportunity'
 
 function formatDate(value: string) {
@@ -29,12 +37,24 @@ export function OpportunityList({
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [view, setView] = useState<'table' | 'pipeline'>('table')
+  const [movingId, setMovingId] = useState<string | null>(null)
+  const [optimisticStatuses, setOptimisticStatuses] = useState<
+    Record<string, OpportunityStatus>
+  >({})
 
-  const filtered = opportunities.filter((item) => {
-    const matchesStatus = statusFilter === 'all' || item.status === statusFilter
+  const visibleOpportunities = opportunities.map((item) => ({
+    ...item,
+    status: optimisticStatuses[item.id] ?? item.status,
+  }))
+  const searched = visibleOpportunities.filter((item) => {
     const text =
       `${item.companyName ?? ''} ${item.title ?? ''} ${item.location ?? ''}`.toLowerCase()
-    return matchesStatus && text.includes(search.trim().toLowerCase())
+    return text.includes(search.trim().toLowerCase())
+  })
+  const filtered = searched.filter((item) => {
+    const matchesStatus = statusFilter === 'all' || item.status === statusFilter
+    return matchesStatus
   })
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
@@ -70,15 +90,36 @@ export function OpportunityList({
     }
   }
 
-  async function handleStatus(id: string, status: OpportunityStatus) {
+  async function handleStatus(
+    id: string,
+    status: OpportunityStatus,
+  ): Promise<boolean> {
+    const current = visibleOpportunities.find((item) => item.id === id)
+    if (!current || current.status === status) return false
     setError(null)
+    setMovingId(id)
+    setOptimisticStatuses((values) => ({ ...values, [id]: status }))
     try {
       await changeOpportunityStatus({ data: { opportunityId: id, status } })
       await router.invalidate()
+      setOptimisticStatuses((values) => {
+        const next = { ...values }
+        delete next[id]
+        return next
+      })
+      return true
     } catch (cause) {
+      setOptimisticStatuses((values) => {
+        const next = { ...values }
+        delete next[id]
+        return next
+      })
       setError(
         cause instanceof Error ? cause.message : 'Unable to update the status.',
       )
+      return false
+    } finally {
+      setMovingId(null)
     }
   }
 
@@ -107,24 +148,47 @@ export function OpportunityList({
           {error}
         </p>
       )}
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_330px]">
+      <div
+        className={`opportunity-layout${view === 'pipeline' ? ' is-pipeline' : ''}`}
+      >
         <section
           aria-labelledby="opportunity-list-heading"
           className="min-w-0 overflow-hidden rounded-xl border border-[#e1e7e1] bg-white"
         >
-          <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#e9eee8] p-5">
+          <div className="opportunity-toolbar">
             <div>
               <h2
                 id="opportunity-list-heading"
                 className="text-lg font-semibold tracking-tight text-[#1e382d]"
               >
-                Saved roles
+                {view === 'table' ? 'Saved roles' : 'Application pipeline'}
               </h2>
               <p className="mt-1 text-xs text-[#8a978e]">
-                {opportunities.length} total · newest first
+                {view === 'table'
+                  ? `${filtered.length} shown · newest first`
+                  : `${searched.length} shown across ${opportunityStatuses.length} stages`}
               </p>
             </div>
-            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            <div className="opportunity-toolbar-controls">
+              <div
+                className="opportunity-view-toggle"
+                aria-label="Opportunity view"
+              >
+                <button
+                  type="button"
+                  aria-pressed={view === 'table'}
+                  onClick={() => setView('table')}
+                >
+                  <List size={15} aria-hidden="true" /> Table
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={view === 'pipeline'}
+                  onClick={() => setView('pipeline')}
+                >
+                  <Columns3 size={15} aria-hidden="true" /> Pipeline
+                </button>
+              </div>
               <label className="sr-only" htmlFor="opportunity-search">
                 Search opportunities
               </label>
@@ -136,22 +200,26 @@ export function OpportunityList({
                 placeholder="Search roles or companies"
                 className="min-w-0 flex-1 rounded-md border border-[#dce5dd] bg-[#fcfdfa] px-3 py-2 text-xs focus-visible:outline-2 focus-visible:outline-[#246b59] sm:w-52"
               />
-              <label className="sr-only" htmlFor="status-filter">
-                Filter by status
-              </label>
-              <select
-                id="status-filter"
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value)}
-                className="rounded-md border border-[#dce5dd] bg-[#fcfdfa] px-3 py-2 text-xs focus-visible:outline-2 focus-visible:outline-[#246b59]"
-              >
-                <option value="all">All statuses</option>
-                {opportunityStatuses.map((status) => (
-                  <option key={status} value={status}>
-                    {statusLabels[status]}
-                  </option>
-                ))}
-              </select>
+              {view === 'table' && (
+                <>
+                  <label className="sr-only" htmlFor="status-filter">
+                    Filter by status
+                  </label>
+                  <select
+                    id="status-filter"
+                    value={statusFilter}
+                    onChange={(event) => setStatusFilter(event.target.value)}
+                    className="rounded-md border border-[#dce5dd] bg-[#fcfdfa] px-3 py-2 text-xs focus-visible:outline-2 focus-visible:outline-[#246b59]"
+                  >
+                    <option value="all">All statuses</option>
+                    {opportunityStatuses.map((status) => (
+                      <option key={status} value={status}>
+                        {statusLabels[status]}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
             </div>
           </div>
           {opportunities.length === 0 ? (
@@ -171,7 +239,7 @@ export function OpportunityList({
                 pasted description is enough to get started.
               </p>
             </div>
-          ) : filtered.length === 0 ? (
+          ) : (view === 'table' ? filtered : searched).length === 0 ? (
             <div className="flex min-h-56 flex-col items-center justify-center px-6 py-10 text-sm text-[#75857a]">
               <Search
                 size={24}
@@ -180,6 +248,12 @@ export function OpportunityList({
               />
               No opportunities match those filters.
             </div>
+          ) : view === 'pipeline' ? (
+            <OpportunityPipeline
+              opportunities={searched}
+              movingId={movingId}
+              onMove={handleStatus}
+            />
           ) : (
             <>
               <ul className="space-y-3 sm:hidden">
@@ -214,6 +288,7 @@ export function OpportunityList({
                       <select
                         id={`mobile-status-${item.id}`}
                         value={item.status}
+                        disabled={movingId === item.id}
                         onChange={(event) =>
                           void handleStatus(
                             item.id,
@@ -288,6 +363,7 @@ export function OpportunityList({
                           <select
                             id={`status-${item.id}`}
                             value={item.status}
+                            disabled={movingId === item.id}
                             onChange={(event) =>
                               void handleStatus(
                                 item.id,
@@ -318,7 +394,7 @@ export function OpportunityList({
           )}
         </section>
         <aside
-          className="order-first self-start rounded-xl border border-[#e1e7e1] bg-white p-6 xl:order-last"
+          className="opportunity-create-panel order-first self-start rounded-xl border border-[#e1e7e1] bg-white p-6 xl:order-last"
           aria-labelledby="new-opportunity-heading"
         >
           <h2

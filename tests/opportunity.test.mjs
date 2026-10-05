@@ -6,6 +6,7 @@ import {
   completeFollowUpSchema,
   createFollowUpSchema,
   editOpportunitySchema,
+  groupOpportunitiesByStatus,
 } from '../src/lib/opportunity.ts'
 
 const editable = {
@@ -79,4 +80,33 @@ test('status and completion requests reject unknown identifiers', () => {
     }).success,
     false,
   )
+})
+
+test('pipeline grouping preserves every lifecycle stage and card order', () => {
+  const opportunities = [
+    {
+      id: 'first',
+      status: 'applied',
+      savedAt: '2026-09-20T09:00:00.000Z',
+    },
+    {
+      id: 'second',
+      status: 'saved',
+      savedAt: '2026-09-19T09:00:00.000Z',
+    },
+    {
+      id: 'third',
+      status: 'applied',
+      savedAt: '2026-09-18T09:00:00.000Z',
+    },
+  ]
+  const groups = groupOpportunitiesByStatus(opportunities)
+
+  assert.deepEqual(
+    groups.applied.map((item) => item.id),
+    ['first', 'third'],
+  )
+  assert.equal(groups.saved[0].id, 'second')
+  assert.deepEqual(groups.offer, [])
+  assert.equal(Object.keys(groups).length, 11)
 })

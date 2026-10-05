@@ -108,3 +108,26 @@ export type OpportunitySummary = {
   savedAt: string
   isSample: boolean
 }
+
+export function groupOpportunitiesByStatus(
+  opportunities: OpportunitySummary[],
+): Record<OpportunityStatus, OpportunitySummary[]> {
+  const groups: Record<OpportunityStatus, OpportunitySummary[]> = {
+    saved: [],
+    preparing: [],
+    applied: [],
+    screening: [],
+    interview: [],
+    final_round: [],
+    offer: [],
+    rejected: [],
+    withdrawn: [],
+    ghosted: [],
+    closed: [],
+  }
+
+  for (const opportunity of opportunities)
+    groups[opportunity.status].push(opportunity)
+
+  return groups
+}

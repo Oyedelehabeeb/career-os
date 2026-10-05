@@ -16,6 +16,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ResumesRouteImport } from './routes/resumes'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
 import { Route as OpportunitiesOpportunityIdRouteImport } from './routes/opportunities_.$opportunityId'
@@ -55,6 +57,16 @@ const ResumesRoute = ResumesRouteImport.update({
   path: '/resumes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
@@ -80,6 +92,8 @@ export interface FileRoutesByFullPath {
   '/opportunities': typeof OpportunitiesRoute
   '/profile': typeof ProfileRoute
   '/resumes': typeof ResumesRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/sign-up': typeof SignUpRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/opportunities/$opportunityId': typeof OpportunitiesOpportunityIdRoute
@@ -92,6 +106,8 @@ export interface FileRoutesByTo {
   '/opportunities': typeof OpportunitiesRoute
   '/profile': typeof ProfileRoute
   '/resumes': typeof ResumesRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/sign-up': typeof SignUpRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/opportunities/$opportunityId': typeof OpportunitiesOpportunityIdRoute
@@ -105,6 +121,8 @@ export interface FileRoutesById {
   '/opportunities': typeof OpportunitiesRoute
   '/profile': typeof ProfileRoute
   '/resumes': typeof ResumesRoute
+  '/search': typeof SearchRoute
+  '/settings': typeof SettingsRoute
   '/sign-up': typeof SignUpRoute
   '/auth/confirm': typeof AuthConfirmRoute
   '/opportunities_/$opportunityId': typeof OpportunitiesOpportunityIdRoute
@@ -119,6 +137,8 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/profile'
     | '/resumes'
+    | '/search'
+    | '/settings'
     | '/sign-up'
     | '/auth/confirm'
     | '/opportunities/$opportunityId'
@@ -131,6 +151,8 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/profile'
     | '/resumes'
+    | '/search'
+    | '/settings'
     | '/sign-up'
     | '/auth/confirm'
     | '/opportunities/$opportunityId'
@@ -143,6 +165,8 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/profile'
     | '/resumes'
+    | '/search'
+    | '/settings'
     | '/sign-up'
     | '/auth/confirm'
     | '/opportunities_/$opportunityId'
@@ -156,6 +180,8 @@ export interface RootRouteChildren {
   OpportunitiesRoute: typeof OpportunitiesRoute
   ProfileRoute: typeof ProfileRoute
   ResumesRoute: typeof ResumesRoute
+  SearchRoute: typeof SearchRoute
+  SettingsRoute: typeof SettingsRoute
   SignUpRoute: typeof SignUpRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
   OpportunitiesOpportunityIdRoute: typeof OpportunitiesOpportunityIdRoute
@@ -212,6 +238,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResumesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-up': {
       id: '/sign-up'
       path: '/sign-up'
@@ -244,6 +284,8 @@ const rootRouteChildren: RootRouteChildren = {
   OpportunitiesRoute: OpportunitiesRoute,
   ProfileRoute: ProfileRoute,
   ResumesRoute: ResumesRoute,
+  SearchRoute: SearchRoute,
+  SettingsRoute: SettingsRoute,
   SignUpRoute: SignUpRoute,
   AuthConfirmRoute: AuthConfirmRoute,
   OpportunitiesOpportunityIdRoute: OpportunitiesOpportunityIdRoute,

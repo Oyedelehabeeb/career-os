@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Search,
+  Settings,
   UserRound,
   X,
 } from 'lucide-react'
@@ -17,9 +19,11 @@ import { createClient } from '../lib/supabase/client'
 const navigation = [
   { to: '/app', label: 'Overview', icon: LayoutDashboard },
   { to: '/opportunities', label: 'Opportunities', icon: BriefcaseBusiness },
+  { to: '/search', label: 'Search', icon: Search },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/resumes', label: 'Resumes', icon: FileText },
   { to: '/profile', label: 'Profile', icon: UserRound },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ] as const
 
 export function AppShell({

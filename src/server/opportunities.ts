@@ -24,7 +24,7 @@ export const listOpportunities = createServerFn({ method: 'GET' }).handler(
     const opportunitiesResult = await supabase
       .from('opportunities')
       .select(
-        'id, company_id, title, location, status, priority, saved_at, source',
+        'id, company_id, title, location, status, priority, saved_at, updated_at, source',
       )
       .order('saved_at', { ascending: false })
       .limit(100)
@@ -58,6 +58,7 @@ export const listOpportunities = createServerFn({ method: 'GET' }).handler(
       status: item.status as OpportunityStatus,
       priority: item.priority as OpportunitySummary['priority'],
       savedAt: item.saved_at,
+      updatedAt: item.updated_at,
       isSample: item.source === 'CareerOS sample',
     }))
   },

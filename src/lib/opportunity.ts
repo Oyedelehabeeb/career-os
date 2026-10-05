@@ -106,6 +106,7 @@ export type OpportunitySummary = {
   status: OpportunityStatus
   priority: 'low' | 'medium' | 'high'
   savedAt: string
+  updatedAt: string
   isSample: boolean
 }
 

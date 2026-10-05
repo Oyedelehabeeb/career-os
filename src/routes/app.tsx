@@ -1,38 +1,26 @@
 import {
+  AlertTriangle,
   ArrowRight,
   BriefcaseBusiness,
   CalendarDays,
-  CircleCheck,
-  Clock3,
   Plus,
   Sparkles,
+  TimerReset,
 } from 'lucide-react'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 
 import { AppShell } from '../components/app-shell'
 import { statusLabels } from '../lib/opportunity'
-import { profileCompletion } from '../lib/profile'
 import { getCurrentUser } from '../server/auth'
 import { listDueFollowUps, listOpportunities } from '../server/opportunities'
-import { getCareerProfile } from '../server/profile'
 import { listUpcomingInterviews } from '../server/opportunity-records'
 import { interviewTypeLabels } from '../lib/opportunity-records'
-import type { OpportunitySummary } from '../lib/opportunity'
-
-const activeStatuses = new Set([
-  'saved',
-  'preparing',
-  'applied',
-  'screening',
-  'interview',
-  'final_round',
-])
-const progressStatuses = new Set([
-  'screening',
-  'interview',
-  'final_round',
-  'offer',
-])
+import {
+  buildActivePipelineSummary,
+  daysSince,
+  findStaleOpportunities,
+  splitFollowUps,
+} from '../lib/dashboard'
 
 export const Route = createFileRoute('/app')({
   headers: () => ({ 'Cache-Control': 'private, no-store' }),
@@ -42,14 +30,12 @@ export const Route = createFileRoute('/app')({
     return { user }
   },
   loader: async () => {
-    const [opportunities, followUps, careerProfile, upcomingInterviews] =
-      await Promise.all([
-        listOpportunities(),
-        listDueFollowUps(),
-        getCareerProfile(),
-        listUpcomingInterviews(),
-      ])
-    return { opportunities, followUps, careerProfile, upcomingInterviews }
+    const [opportunities, followUps, upcomingInterviews] = await Promise.all([
+      listOpportunities(),
+      listDueFollowUps(),
+      listUpcomingInterviews(),
+    ])
+    return { opportunities, followUps, upcomingInterviews }
   },
   component: AppHome,
   errorComponent: ({ error }) => (
@@ -85,50 +71,70 @@ function Stat({
   )
 }
 
-function OpportunityRow({ opportunity }: { opportunity: OpportunitySummary }) {
+function FollowUpRow({
+  followUp,
+  overdue,
+}: {
+  followUp: {
+    id: string
+    opportunityId: string
+    title: string
+    dueAt: string
+    role: string
+  }
+  overdue: boolean
+}) {
   return (
     <Link
-      className="overview-row"
       to="/opportunities/$opportunityId"
-      params={{ opportunityId: opportunity.id }}
+      params={{ opportunityId: followUp.opportunityId }}
+      className="overview-followup"
     >
-      <span className="overview-row-initial" aria-hidden="true">
-        {(opportunity.companyName || opportunity.title || 'R')
-          .charAt(0)
-          .toUpperCase()}
+      <span
+        className={
+          overdue
+            ? 'overview-followup-date is-overdue'
+            : 'overview-followup-date'
+        }
+      >
+        {overdue
+          ? 'Overdue'
+          : new Intl.DateTimeFormat('en-GB', {
+              month: 'short',
+              day: 'numeric',
+            }).format(new Date(followUp.dueAt))}
       </span>
-      <span className="overview-row-main">
-        <strong>{opportunity.title || 'Untitled role'}</strong>
-        {opportunity.isSample && <em className="overview-sample">Sample</em>}
-        <small>{opportunity.companyName || 'Company not set'}</small>
+      <span>
+        <strong>{followUp.title}</strong>
+        <small>{followUp.role}</small>
       </span>
-      <span className={`workspace-status status-${opportunity.status}`}>
-        {statusLabels[opportunity.status]}
-      </span>
-      <ArrowRight size={17} aria-hidden="true" />
+      <ArrowRight size={16} aria-hidden="true" />
     </Link>
   )
 }
 
 function AppHome() {
   const { user } = Route.useRouteContext()
-  const { opportunities, followUps, careerProfile, upcomingInterviews } =
-    Route.useLoaderData()
-  const completion = profileCompletion(
-    careerProfile.profile,
-    careerProfile.skills.length,
-  )
+  const { opportunities, followUps, upcomingInterviews } = Route.useLoaderData()
+  const now = new Date()
   const realOpportunities = opportunities.filter((item) => !item.isSample)
-  const active = realOpportunities.filter((item) =>
-    activeStatuses.has(item.status),
+  const pipelineSummary = buildActivePipelineSummary(opportunities)
+  const activeCount = pipelineSummary.reduce(
+    (total, stage) => total + stage.count,
+    0,
   )
-  const applied = realOpportunities.filter(
-    (item) => item.status !== 'saved' && item.status !== 'preparing',
+  const maxStageCount = Math.max(
+    1,
+    ...pipelineSummary.map((stage) => stage.count),
   )
-  const progressed = realOpportunities.filter((item) =>
-    progressStatuses.has(item.status),
-  )
+  const staleOpportunities = findStaleOpportunities(opportunities, now)
+  const followUpGroups = splitFollowUps(followUps, now)
   const recent = opportunities.slice(0, 4)
+  const nextOpportunityId =
+    followUpGroups.overdue[0]?.opportunityId ??
+    upcomingInterviews[0]?.opportunityId ??
+    staleOpportunities[0]?.id ??
+    recent[0]?.id
 
   return (
     <AppShell email={user.email}>
@@ -160,33 +166,51 @@ function AppHome() {
           <div>
             <p className="overview-eyebrow">YOUR NEXT MOVE</p>
             <h2 id="attention-heading">
-              {realOpportunities.length === 0
-                ? opportunities.length > 0
-                  ? 'Explore your sample workspace.'
-                  : 'Start with one opportunity.'
-                : active.length > 0
-                  ? 'Keep your active roles moving.'
-                  : 'Your pipeline is ready for a new lead.'}
+              {followUpGroups.overdue.length > 0
+                ? `${followUpGroups.overdue.length} overdue ${followUpGroups.overdue.length === 1 ? 'follow-up needs' : 'follow-ups need'} your attention.`
+                : upcomingInterviews.length > 0
+                  ? 'Prepare for your next conversation.'
+                  : staleOpportunities.length > 0
+                    ? 'Bring a quiet opportunity back into focus.'
+                    : realOpportunities.length === 0
+                      ? opportunities.length > 0
+                        ? 'Explore your sample workspace.'
+                        : 'Start with one opportunity.'
+                      : activeCount > 0
+                        ? 'Keep your active roles moving.'
+                        : 'Your pipeline is ready for a new lead.'}
             </h2>
             <p>
-              {realOpportunities.length === 0
-                ? opportunities.length > 0
-                  ? 'The example roles show how CareerOS works. They are labeled Sample and excluded from your pipeline metrics.'
-                  : 'Save a role you are considering. Even a company name or job link is enough to begin.'
-                : active.length > 0
-                  ? `You have ${active.length} active ${active.length === 1 ? 'opportunity' : 'opportunities'}. Review the latest one, update its status, or capture the next role.`
-                  : 'Your saved roles are no longer active. Add a new opportunity when you find one worth tracking.'}
+              {followUpGroups.overdue.length > 0
+                ? 'Open the oldest follow-up, complete it, or schedule the next action so nothing promising goes quiet.'
+                : upcomingInterviews.length > 0
+                  ? `Your next interview is ${new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(upcomingInterviews[0].scheduledAt))}. Review the role and preparation notes before it begins.`
+                  : staleOpportunities.length > 0
+                    ? `${staleOpportunities[0].title || 'An active role'} has had no update for ${daysSince(staleOpportunities[0].updatedAt, now)} days. Decide whether to follow up, update its stage, or close it.`
+                    : realOpportunities.length === 0
+                      ? opportunities.length > 0
+                        ? 'The example roles show how CareerOS works. They are labeled Sample and excluded from your pipeline metrics.'
+                        : 'Save a role you are considering. Even a company name or job link is enough to begin.'
+                      : activeCount > 0
+                        ? `You have ${activeCount} active ${activeCount === 1 ? 'opportunity' : 'opportunities'}. Review the latest one, update its status, or capture the next role.`
+                        : 'Your saved roles are no longer active. Add a new opportunity when you find one worth tracking.'}
             </p>
           </div>
-          {recent.length ? (
+          {nextOpportunityId ? (
             <Link
               to="/opportunities/$opportunityId"
-              params={{ opportunityId: recent[0].id }}
+              params={{ opportunityId: nextOpportunityId }}
               className="overview-hero-link"
             >
-              {realOpportunities.length === 0
-                ? 'Explore sample role'
-                : 'Review latest role'}{' '}
+              {followUpGroups.overdue.length
+                ? 'Open overdue action'
+                : upcomingInterviews.length
+                  ? 'Prepare for interview'
+                  : staleOpportunities.length
+                    ? 'Review stale role'
+                    : realOpportunities.length === 0
+                      ? 'Explore sample role'
+                      : 'Review latest role'}{' '}
               <ArrowRight size={16} aria-hidden="true" />
             </Link>
           ) : (
@@ -199,21 +223,27 @@ function AppHome() {
         <section aria-label="Pipeline snapshot" className="overview-stats">
           <Stat
             label="Active opportunities"
-            value={active.length}
+            value={activeCount}
             detail="Still in motion"
             icon={BriefcaseBusiness}
           />
           <Stat
-            label="Applications & beyond"
-            value={applied.length}
-            detail="Submitted or progressed"
-            icon={CircleCheck}
+            label="Overdue follow-ups"
+            value={followUpGroups.overdue.length}
+            detail="Need action now"
+            icon={AlertTriangle}
           />
           <Stat
-            label="Conversations"
-            value={progressed.length}
-            detail="Screening through offer"
-            icon={Clock3}
+            label="Upcoming interviews"
+            value={upcomingInterviews.length}
+            detail="Scheduled ahead"
+            icon={CalendarDays}
+          />
+          <Stat
+            label="Stale opportunities"
+            value={staleOpportunities.length}
+            detail="No update in 14+ days"
+            icon={TimerReset}
           />
         </section>
 
@@ -225,43 +255,35 @@ function AppHome() {
             <div className="workspace-panel-heading">
               <div>
                 <p className="overview-eyebrow">WHAT NEEDS ATTENTION</p>
-                <h2 id="followups-heading">Upcoming follow-ups</h2>
+                <h2 id="followups-heading">Follow-ups</h2>
               </div>
             </div>
             {followUps.length ? (
               <div className="overview-followups">
-                {followUps.map((followUp) => {
-                  const overdue =
-                    new Date(followUp.dueAt).getTime() < Date.now()
-                  return (
-                    <Link
-                      key={followUp.id}
-                      to="/opportunities/$opportunityId"
-                      params={{ opportunityId: followUp.opportunityId }}
-                      className="overview-followup"
-                    >
-                      <span
-                        className={
-                          overdue
-                            ? 'overview-followup-date is-overdue'
-                            : 'overview-followup-date'
-                        }
-                      >
-                        {overdue
-                          ? 'Overdue'
-                          : new Intl.DateTimeFormat('en-GB', {
-                              month: 'short',
-                              day: 'numeric',
-                            }).format(new Date(followUp.dueAt))}
-                      </span>
-                      <span>
-                        <strong>{followUp.title}</strong>
-                        <small>{followUp.role}</small>
-                      </span>
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </Link>
-                  )
-                })}
+                {followUpGroups.overdue.length > 0 && (
+                  <div className="overview-action-group">
+                    <p>OVERDUE · {followUpGroups.overdue.length}</p>
+                    {followUpGroups.overdue.map((followUp) => (
+                      <FollowUpRow
+                        key={followUp.id}
+                        followUp={followUp}
+                        overdue
+                      />
+                    ))}
+                  </div>
+                )}
+                {followUpGroups.upcoming.length > 0 && (
+                  <div className="overview-action-group">
+                    <p>UPCOMING · {followUpGroups.upcoming.length}</p>
+                    {followUpGroups.upcoming.map((followUp) => (
+                      <FollowUpRow
+                        key={followUp.id}
+                        followUp={followUp}
+                        overdue={false}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <p className="overview-attention-empty">
@@ -291,12 +313,15 @@ function AppHome() {
                     params={{ opportunityId: interview.opportunityId }}
                     className="overview-followup"
                   >
-                    <span className="overview-followup-date">
+                    <time
+                      className="overview-followup-date"
+                      dateTime={interview.scheduledAt}
+                    >
                       {new Intl.DateTimeFormat('en-GB', {
                         month: 'short',
                         day: 'numeric',
                       }).format(new Date(interview.scheduledAt))}
-                    </span>
+                    </time>
                     <span>
                       <strong>
                         {interviewTypeLabels[interview.interviewType]}
@@ -305,7 +330,12 @@ function AppHome() {
                         {interview.role}
                         {interview.contactName
                           ? ` · ${interview.contactName}`
-                          : ''}
+                          : ''}{' '}
+                        ·{' '}
+                        {new Intl.DateTimeFormat('en-GB', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }).format(new Date(interview.scheduledAt))}
                       </small>
                     </span>
                     <ArrowRight size={16} aria-hidden="true" />
@@ -322,60 +352,88 @@ function AppHome() {
         </div>
 
         <div className="overview-grid">
-          <section className="workspace-panel" aria-labelledby="recent-heading">
+          <section className="workspace-panel" aria-labelledby="stale-heading">
             <div className="workspace-panel-heading">
               <div>
-                <p className="overview-eyebrow">YOUR PIPELINE</p>
-                <h2 id="recent-heading">Recent opportunities</h2>
+                <p className="overview-eyebrow">NEEDS A DECISION</p>
+                <h2 id="stale-heading">Stale opportunities</h2>
               </div>
               <Link to="/opportunities" className="workspace-text-link">
                 View all <ArrowRight size={15} aria-hidden="true" />
               </Link>
             </div>
-            {recent.length ? (
-              <div className="overview-rows">
-                {recent.map((item) => (
-                  <OpportunityRow key={item.id} opportunity={item} />
+            {staleOpportunities.length ? (
+              <div className="overview-stale-list">
+                {staleOpportunities.slice(0, 4).map((item) => (
+                  <Link
+                    key={item.id}
+                    to="/opportunities/$opportunityId"
+                    params={{ opportunityId: item.id }}
+                    className="overview-stale-row"
+                  >
+                    <span className="overview-stale-icon" aria-hidden="true">
+                      <TimerReset size={16} />
+                    </span>
+                    <span>
+                      <strong>{item.title || 'Untitled role'}</strong>
+                      <small>
+                        {item.companyName || 'Company not set'} ·{' '}
+                        {statusLabels[item.status]}
+                      </small>
+                    </span>
+                    <span>{daysSince(item.updatedAt, now)} days</span>
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
                 ))}
               </div>
             ) : (
-              <div className="overview-empty">
-                <BriefcaseBusiness
-                  size={25}
-                  strokeWidth={1.4}
-                  aria-hidden="true"
-                />
-                <strong>No opportunities yet</strong>
+              <div className="overview-empty is-healthy">
+                <TimerReset size={25} strokeWidth={1.4} aria-hidden="true" />
+                <strong>No stale opportunities</strong>
                 <p>
-                  Your saved roles will appear here as your search takes shape.
+                  Active roles updated within the last 14 days are considered
+                  current.
                 </p>
               </div>
             )}
           </section>
           <section
-            className="workspace-panel overview-guide"
-            aria-labelledby="guide-heading"
+            className="workspace-panel overview-pipeline-panel"
+            aria-labelledby="pipeline-summary-heading"
           >
-            <p className="overview-eyebrow">CAREER FOUNDATION</p>
-            <h2 id="guide-heading">
-              {completion === 100
-                ? 'Your profile is ready for intelligence.'
-                : 'Give every role better context.'}
-            </h2>
-            <p>
-              CareerOS uses your private profile and skills to explain where a
-              role aligns—and where it may stretch you.
-            </p>
-            <div className="overview-profile-meter">
-              <span style={{ width: `${completion}%` }} />
+            <div className="workspace-panel-heading">
+              <div>
+                <p className="overview-eyebrow">ACTIVE PIPELINE</p>
+                <h2 id="pipeline-summary-heading">Where roles stand</h2>
+              </div>
+              <strong className="overview-pipeline-total">{activeCount}</strong>
             </div>
-            <div className="overview-guide-line">
-              <span>{completion}%</span>
-              <span>Profile foundation complete</span>
-            </div>
-            <Link to="/profile" className="overview-profile-link">
-              {completion ? 'Continue profile' : 'Start career profile'}{' '}
-              <ArrowRight size={15} aria-hidden="true" />
+            {activeCount ? (
+              <div className="overview-pipeline-summary">
+                {pipelineSummary.map((stage) => (
+                  <div key={stage.status} className="overview-pipeline-stage">
+                    <div>
+                      <span>{statusLabels[stage.status]}</span>
+                      <strong>{stage.count}</strong>
+                    </div>
+                    <span aria-hidden="true">
+                      <i
+                        style={{
+                          width: `${(stage.count / maxStageCount) * 100}%`,
+                        }}
+                      />
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="overview-attention-empty">
+                Add a real opportunity to start measuring your active pipeline.
+                Sample roles stay out of your metrics.
+              </p>
+            )}
+            <Link to="/opportunities" className="overview-pipeline-link">
+              Open pipeline <ArrowRight size={15} aria-hidden="true" />
             </Link>
           </section>
         </div>

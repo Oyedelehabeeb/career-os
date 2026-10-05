@@ -11,10 +11,13 @@ import {
 import { AppShell } from '../components/app-shell'
 import { CandidateFitPanel } from '../components/candidate-fit-panel'
 import { JobIntelligencePanel } from '../components/job-intelligence-panel'
+import { OpportunityJournal } from '../components/opportunity-journal'
+import { OpportunityTimeline } from '../components/opportunity-timeline'
 import { opportunityStatuses, statusLabels } from '../lib/opportunity'
 import { getCurrentUser } from '../server/auth'
 import { getJobAnalysis } from '../server/job-intelligence'
 import { getOpportunityFit } from '../server/opportunity-fit'
+import { getOpportunityRecords } from '../server/opportunity-records'
 import {
   changeOpportunityStatus,
   completeFollowUp,
@@ -36,20 +39,21 @@ export const Route = createFileRoute('/opportunities_/$opportunityId')({
     return { user }
   },
   loader: async ({ params }) => {
-    const [opportunity, resumes, analysis, fit] = await Promise.all([
+    const [opportunity, resumes, analysis, fit, records] = await Promise.all([
       getOpportunity({ data: { opportunityId: params.opportunityId } }),
       listResumeVersions(),
       getJobAnalysis({ data: { opportunityId: params.opportunityId } }),
       getOpportunityFit({ data: { opportunityId: params.opportunityId } }),
+      getOpportunityRecords({ data: { opportunityId: params.opportunityId } }),
     ])
-    return { opportunity, resumes, analysis, fit }
+    return { opportunity, resumes, analysis, fit, records }
   },
   component: OpportunityPage,
 })
 
 function OpportunityPage() {
   const { user } = Route.useRouteContext()
-  const { opportunity, resumes, analysis, fit } = Route.useLoaderData()
+  const { opportunity, resumes, analysis, fit, records } = Route.useLoaderData()
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
@@ -402,6 +406,10 @@ function OpportunityPage() {
               jobAnalysis={analysis}
               fit={fit}
             />
+            <OpportunityJournal
+              opportunityId={opportunity.id}
+              records={records}
+            />
           </div>
           <div className="space-y-6 self-start">
             <section
@@ -554,34 +562,11 @@ function OpportunityPage() {
                 )}
               </div>
             </section>
-            <aside
-              aria-labelledby="activity-heading"
-              className="border border-[#dbe3dd] bg-white p-6"
-            >
-              <h2 id="activity-heading" className="text-lg font-semibold">
-                Status history
-              </h2>
-              <ol className="mt-5 space-y-5 border-l border-[#cbd8d0] pl-4">
-                {opportunity.history.map((event) => (
-                  <li key={event.id}>
-                    <p className="text-sm font-medium">
-                      {event.fromStatus
-                        ? `Moved to ${statusLabels[event.toStatus]}`
-                        : `Saved as ${statusLabels[event.toStatus]}`}
-                    </p>
-                    <time
-                      dateTime={event.occurredAt}
-                      className="mt-1 block text-xs text-[#687a73]"
-                    >
-                      {new Intl.DateTimeFormat('en-GB', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short',
-                      }).format(new Date(event.occurredAt))}
-                    </time>
-                  </li>
-                ))}
-              </ol>
-            </aside>
+            <OpportunityTimeline
+              history={opportunity.history}
+              followUps={opportunity.followUps}
+              records={records}
+            />
           </div>
         </div>
       </main>

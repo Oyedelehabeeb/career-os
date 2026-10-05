@@ -2002,6 +2002,462 @@ a {
   font-size: 8px;
   text-align: right;
 }
+.opportunity-journal {
+  overflow: hidden;
+  border: 1px solid #dbe5dc;
+  background: white;
+}
+.journal-heading {
+  padding: 23px 24px 20px;
+  background: #f8faf6;
+}
+.journal-heading h2 {
+  margin-top: 5px;
+  color: #263f31;
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+}
+.journal-heading > div > p:not(.overview-eyebrow) {
+  margin-top: 4px;
+  color: #7d8e83;
+  font-size: 10px;
+  line-height: 1.55;
+}
+.journal-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 24px;
+  border-bottom: 1px solid #e4ebe5;
+  background: #f8faf6;
+}
+.journal-tabs button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  border-bottom: 2px solid transparent;
+  color: #6d8174;
+  font-size: 10px;
+  font-weight: 700;
+}
+.journal-tabs button:hover,
+.journal-tabs button.is-active {
+  color: #245b45;
+}
+.journal-tabs button.is-active {
+  border-bottom-color: #2b7354;
+}
+.journal-tabs button span {
+  display: inline-grid;
+  min-width: 19px;
+  height: 19px;
+  place-items: center;
+  border-radius: 99px;
+  background: #e8eee8;
+  font-size: 8px;
+}
+.journal-notice {
+  margin: 18px 24px 0;
+  padding: 10px 12px;
+  border: 1px solid #c9decf;
+  border-radius: 6px;
+  background: #f0f8f1;
+  color: #276044;
+  font-size: 10px;
+}
+.journal-notice.is-error {
+  border-color: #e8babb;
+  background: #fff5f4;
+  color: #9b2c31;
+}
+.journal-panel {
+  padding: 22px 24px 24px;
+}
+.journal-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.journal-panel-heading h3 {
+  color: #2c4737;
+  font-size: 13px;
+  font-weight: 750;
+}
+.journal-panel-heading p {
+  margin-top: 3px;
+  color: #829087;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.journal-panel-heading > button,
+.journal-edit {
+  display: inline-flex;
+  min-height: 34px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 0 11px;
+  border: 1px solid #cbd9cc;
+  border-radius: 6px;
+  color: #35694f;
+  font-size: 9px;
+  font-weight: 750;
+}
+.journal-panel-heading > button:hover,
+.journal-edit:hover {
+  background: #eef4ec;
+}
+.journal-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #dce6dc;
+  border-radius: 8px;
+  background: #f8faf7;
+}
+.journal-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.journal-form label {
+  display: grid;
+  gap: 6px;
+  color: #395143;
+  font-size: 9px;
+  font-weight: 700;
+}
+.journal-form input,
+.journal-form select,
+.journal-form textarea {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #d0dcd1;
+  border-radius: 6px;
+  background: white;
+  color: #263d31;
+  font: inherit;
+  font-weight: 500;
+}
+.journal-form textarea {
+  line-height: 1.6;
+  resize: vertical;
+}
+.journal-form input:focus-visible,
+.journal-form select:focus-visible,
+.journal-form textarea:focus-visible {
+  outline: 2px solid #37785c;
+  outline-offset: 1px;
+}
+.journal-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+.journal-form-actions button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid #ccd8cd;
+  border-radius: 6px;
+  color: #5c7062;
+  font-size: 9px;
+  font-weight: 750;
+}
+.journal-form-actions button.is-primary {
+  border-color: #205d49;
+  background: #205d49;
+  color: white;
+}
+.journal-form-actions button:disabled {
+  opacity: 0.5;
+}
+.journal-empty {
+  display: grid;
+  min-height: 175px;
+  justify-items: center;
+  align-content: center;
+  color: #769080;
+  text-align: center;
+}
+.journal-empty > span {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  place-items: center;
+  border-radius: 9px;
+  background: #eef4ec;
+}
+.journal-empty svg {
+  width: 20px;
+}
+.journal-empty strong {
+  margin-top: 10px;
+  color: #344f3d;
+  font-size: 11px;
+}
+.journal-empty p {
+  max-width: 380px;
+  margin-top: 5px;
+  color: #89978e;
+  font-size: 9px;
+  line-height: 1.6;
+}
+.contact-list,
+.interview-list,
+.note-list {
+  margin-top: 18px;
+  border-top: 1px solid #e6ece6;
+}
+.contact-list > li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e9eee9;
+}
+.contact-list > li > .journal-form,
+.interview-list > li > .journal-form {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 0;
+}
+.journal-record-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf3eb;
+  color: #4e795e;
+}
+.contact-main strong {
+  display: block;
+  color: #304b39;
+  font-size: 11px;
+}
+.contact-main > p {
+  margin-top: 2px;
+  color: #7d8c82;
+  font-size: 9px;
+}
+.contact-main > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 7px;
+}
+.contact-main a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #397055;
+  font-size: 9px;
+  font-weight: 650;
+}
+.contact-main > span {
+  display: block;
+  margin-top: 8px;
+  color: #5c6e63;
+  font-size: 9px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.interview-list > li {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px;
+  padding: 17px 0;
+  border-bottom: 1px solid #e9eee9;
+}
+.interview-date {
+  display: grid;
+  min-height: 49px;
+  place-items: center;
+  align-content: center;
+  border-radius: 7px;
+  background: #edf3eb;
+  color: #3f7052;
+}
+.interview-date span {
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.interview-date strong {
+  font-size: 17px;
+  line-height: 1.05;
+}
+.interview-main > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+.interview-main strong {
+  color: #304b39;
+  font-size: 11px;
+}
+.interview-main > div > span {
+  padding: 3px 6px;
+  border-radius: 99px;
+  background: #fff0d9;
+  color: #8d6527;
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.interview-main > div > span[data-status='completed'] {
+  background: #e7f1e5;
+  color: #347250;
+}
+.interview-main > div > span[data-status='cancelled'] {
+  background: #f2ece9;
+  color: #82695e;
+}
+.interview-main p,
+.interview-main small,
+.interview-main em,
+.interview-main b {
+  display: block;
+  margin-top: 4px;
+  color: #7c8c82;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 500;
+}
+.interview-main a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 7px;
+  color: #347052;
+  font-size: 9px;
+  font-weight: 700;
+}
+.interview-main b {
+  color: #52695b;
+  font-weight: 750;
+}
+.note-list > li {
+  padding: 16px 0;
+  border-bottom: 1px solid #e9eee9;
+}
+.note-list > li > p {
+  color: #3c5145;
+  font-size: 10px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.note-list > li > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.note-list time {
+  color: #94a097;
+  font-size: 8px;
+}
+.note-list button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #49705b;
+  font-size: 8px;
+  font-weight: 700;
+}
+.note-list .journal-form {
+  margin-top: 0;
+}
+.opportunity-timeline {
+  border: 1px solid #dbe3dd;
+  background: white;
+}
+.timeline-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 17px;
+  border-bottom: 1px solid #e7ede7;
+}
+.timeline-heading h2 {
+  margin-top: 5px;
+  color: #2d4636;
+  font-size: 15px;
+  font-weight: 750;
+}
+.timeline-heading > span {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf3eb;
+  color: #577060;
+  font-size: 9px;
+  font-weight: 800;
+}
+.opportunity-timeline ol {
+  padding: 8px 20px 18px;
+}
+.opportunity-timeline li {
+  display: grid;
+  grid-template-columns: 27px minmax(0, 1fr);
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid #edf1ed;
+}
+.opportunity-timeline li:last-child {
+  border-bottom: 0;
+}
+.opportunity-timeline li > span {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf3eb;
+  color: #4c775b;
+}
+.opportunity-timeline li > span[data-kind='interview'] {
+  background: #e8eef7;
+  color: #4d6685;
+}
+.opportunity-timeline li > span[data-kind='note'] {
+  background: #f1ece3;
+  color: #796549;
+}
+.opportunity-timeline strong {
+  color: #344c3c;
+  font-size: 10px;
+}
+.opportunity-timeline p {
+  overflow: hidden;
+  margin-top: 2px;
+  color: #78877e;
+  font-size: 8px;
+  line-height: 1.5;
+}
+.opportunity-timeline time {
+  display: block;
+  margin-top: 4px;
+  color: #a0aaa3;
+  font-size: 8px;
+}
+.timeline-empty {
+  padding: 24px 20px;
+  color: #84948a;
+  font-size: 9px;
+  line-height: 1.6;
+}
 .workspace-form-control {
   display: block;
   width: 100%;
@@ -2020,6 +2476,15 @@ a {
 }
 .overview-attention {
   margin-bottom: 26px;
+}
+.overview-attention-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.overview-attention-grid .overview-attention {
+  margin-bottom: 0;
 }
 .overview-attention-empty {
   padding: 0 23px 23px;
@@ -2083,6 +2548,9 @@ a {
     flex-basis: 210px;
   }
   .overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .overview-attention-grid {
     grid-template-columns: 1fr;
   }
   .profile-layout {
@@ -2270,6 +2738,38 @@ a {
   }
   .resume-text-editor {
     grid-column: 1 / -1;
+  }
+  .journal-heading,
+  .journal-panel {
+    padding-inline: 19px;
+  }
+  .journal-tabs {
+    overflow-x: auto;
+    padding-inline: 10px;
+  }
+  .journal-tabs button {
+    flex: 1 0 auto;
+    justify-content: center;
+  }
+  .journal-panel-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .journal-panel-heading > button {
+    justify-content: center;
+    width: 100%;
+  }
+  .journal-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .contact-list > li,
+  .interview-list > li {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+  .contact-list .journal-edit,
+  .interview-list .journal-edit {
+    grid-column: 2;
+    justify-self: start;
   }
 }
 @media (max-width: 420px) {

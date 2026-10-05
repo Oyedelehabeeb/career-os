@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   BriefcaseBusiness,
+  CalendarDays,
   CircleCheck,
   Clock3,
   Plus,
@@ -14,6 +15,8 @@ import { profileCompletion } from '../lib/profile'
 import { getCurrentUser } from '../server/auth'
 import { listDueFollowUps, listOpportunities } from '../server/opportunities'
 import { getCareerProfile } from '../server/profile'
+import { listUpcomingInterviews } from '../server/opportunity-records'
+import { interviewTypeLabels } from '../lib/opportunity-records'
 import type { OpportunitySummary } from '../lib/opportunity'
 
 const activeStatuses = new Set([
@@ -39,12 +42,14 @@ export const Route = createFileRoute('/app')({
     return { user }
   },
   loader: async () => {
-    const [opportunities, followUps, careerProfile] = await Promise.all([
-      listOpportunities(),
-      listDueFollowUps(),
-      getCareerProfile(),
-    ])
-    return { opportunities, followUps, careerProfile }
+    const [opportunities, followUps, careerProfile, upcomingInterviews] =
+      await Promise.all([
+        listOpportunities(),
+        listDueFollowUps(),
+        getCareerProfile(),
+        listUpcomingInterviews(),
+      ])
+    return { opportunities, followUps, careerProfile, upcomingInterviews }
   },
   component: AppHome,
   errorComponent: ({ error }) => (
@@ -107,7 +112,8 @@ function OpportunityRow({ opportunity }: { opportunity: OpportunitySummary }) {
 
 function AppHome() {
   const { user } = Route.useRouteContext()
-  const { opportunities, followUps, careerProfile } = Route.useLoaderData()
+  const { opportunities, followUps, careerProfile, upcomingInterviews } =
+    Route.useLoaderData()
   const completion = profileCompletion(
     careerProfile.profile,
     careerProfile.skills.length,
@@ -211,57 +217,109 @@ function AppHome() {
           />
         </section>
 
-        <section
-          className="workspace-panel overview-attention"
-          aria-labelledby="followups-heading"
-        >
-          <div className="workspace-panel-heading">
-            <div>
-              <p className="overview-eyebrow">WHAT NEEDS ATTENTION</p>
-              <h2 id="followups-heading">Upcoming follow-ups</h2>
+        <div className="overview-attention-grid">
+          <section
+            className="workspace-panel overview-attention"
+            aria-labelledby="followups-heading"
+          >
+            <div className="workspace-panel-heading">
+              <div>
+                <p className="overview-eyebrow">WHAT NEEDS ATTENTION</p>
+                <h2 id="followups-heading">Upcoming follow-ups</h2>
+              </div>
             </div>
-          </div>
-          {followUps.length ? (
-            <div className="overview-followups">
-              {followUps.map((followUp) => {
-                const overdue = new Date(followUp.dueAt).getTime() < Date.now()
-                return (
+            {followUps.length ? (
+              <div className="overview-followups">
+                {followUps.map((followUp) => {
+                  const overdue =
+                    new Date(followUp.dueAt).getTime() < Date.now()
+                  return (
+                    <Link
+                      key={followUp.id}
+                      to="/opportunities/$opportunityId"
+                      params={{ opportunityId: followUp.opportunityId }}
+                      className="overview-followup"
+                    >
+                      <span
+                        className={
+                          overdue
+                            ? 'overview-followup-date is-overdue'
+                            : 'overview-followup-date'
+                        }
+                      >
+                        {overdue
+                          ? 'Overdue'
+                          : new Intl.DateTimeFormat('en-GB', {
+                              month: 'short',
+                              day: 'numeric',
+                            }).format(new Date(followUp.dueAt))}
+                      </span>
+                      <span>
+                        <strong>{followUp.title}</strong>
+                        <small>{followUp.role}</small>
+                      </span>
+                      <ArrowRight size={16} aria-hidden="true" />
+                    </Link>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="overview-attention-empty">
+                Nothing due right now. Schedule a follow-up inside any
+                opportunity to see it here.
+              </p>
+            )}
+          </section>
+
+          <section
+            className="workspace-panel overview-attention"
+            aria-labelledby="interviews-heading"
+          >
+            <div className="workspace-panel-heading">
+              <div>
+                <p className="overview-eyebrow">UPCOMING CONVERSATIONS</p>
+                <h2 id="interviews-heading">Interviews</h2>
+              </div>
+              <CalendarDays size={19} aria-hidden="true" />
+            </div>
+            {upcomingInterviews.length ? (
+              <div className="overview-followups">
+                {upcomingInterviews.map((interview) => (
                   <Link
-                    key={followUp.id}
+                    key={interview.id}
                     to="/opportunities/$opportunityId"
-                    params={{ opportunityId: followUp.opportunityId }}
+                    params={{ opportunityId: interview.opportunityId }}
                     className="overview-followup"
                   >
-                    <span
-                      className={
-                        overdue
-                          ? 'overview-followup-date is-overdue'
-                          : 'overview-followup-date'
-                      }
-                    >
-                      {overdue
-                        ? 'Overdue'
-                        : new Intl.DateTimeFormat('en-GB', {
-                            month: 'short',
-                            day: 'numeric',
-                          }).format(new Date(followUp.dueAt))}
+                    <span className="overview-followup-date">
+                      {new Intl.DateTimeFormat('en-GB', {
+                        month: 'short',
+                        day: 'numeric',
+                      }).format(new Date(interview.scheduledAt))}
                     </span>
                     <span>
-                      <strong>{followUp.title}</strong>
-                      <small>{followUp.role}</small>
+                      <strong>
+                        {interviewTypeLabels[interview.interviewType]}
+                      </strong>
+                      <small>
+                        {interview.role}
+                        {interview.contactName
+                          ? ` · ${interview.contactName}`
+                          : ''}
+                      </small>
                     </span>
                     <ArrowRight size={16} aria-hidden="true" />
                   </Link>
-                )
-              })}
-            </div>
-          ) : (
-            <p className="overview-attention-empty">
-              Nothing due right now. Schedule a follow-up inside any opportunity
-              to see it here.
-            </p>
-          )}
-        </section>
+                ))}
+              </div>
+            ) : (
+              <p className="overview-attention-empty">
+                No interviews scheduled. Add one inside an opportunity when a
+                conversation is booked.
+              </p>
+            )}
+          </section>
+        </div>
 
         <div className="overview-grid">
           <section className="workspace-panel" aria-labelledby="recent-heading">
